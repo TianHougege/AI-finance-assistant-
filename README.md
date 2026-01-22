@@ -4,6 +4,18 @@
 
 It helps individual investors define their investment framework, record decisions, and receive AI-assisted feedback — focusing on **long-term thinking rather than short-term trading**.
 
+🔗 Live Demo
+
+A live demo of this project is available here:
+
+🌐 https://ai-finance-assistant-two.vercel.app
+
+To make evaluation easier, you may use the following demo account:
+Email: kuangqi0317@outlook.com
+Password: aa12345678
+This account is for demo purposes only and contains non-sensitive sample data.
+All user data in this application is protected by Supabase Auth + Row Level Security (RLS).
+
 
 
 This project is designed as a **portfolio-grade full-stack application**, demonstrating authentication, data isolation, API design, and AI integration.
