@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## **AI Finance Assistant (Sidekick) – Personal Investment Decision Tool**
 
-## Getting Started
+**AI Finance Assistant (Sidekick)** is a personal investment decision-support web application built with **Next.js, Supabase, and AI APIs**.
 
-First, run the development server:
+It helps individual investors define their investment framework, record decisions, and receive AI-assisted feedback — focusing on **long-term thinking rather than short-term trading**.
 
-```bash
+
+
+This project is designed as a **portfolio-grade full-stack application**, demonstrating authentication, data isolation, API design, and AI integration.
+
+## **🚀 Local Development**
+
+```
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## **✨ Core Features**
 
-## Learn More
+### **🔐 Authentication & Authorization**
 
-To learn more about Next.js, take a look at the following resources:
+- Email & password authentication via **Supabase Auth**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Secure **SSR session handling** with cookies
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Route protection using server-side guards
 
-## Deploy on Vercel
+- Row Level Security (RLS) for user data isolation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+  
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### **📊 Investment Framework**
+
+- Define personal investment principles:
+
+  
+
+  - Target return
+  - Risk limits
+  - Asset allocation rules
+  - Holding constraints
+
+- Save & update investment plans
+
+- Each user owns their **private investment data**
+
+  
+
+### **🧠 AI-Assisted Analysis**
+
+- User investment plans are sent to an AI model
+- AI generates structured feedback:
+  - Risk analysis
+  - Logical inconsistencies
+  - Behavioral warnings
+- AI feedback is persisted and reloaded across sessions
+
+
+
+### **📝 Decision Log**
+
+- Record investment decisions with context
+- Decisions are automatically linked to the authenticated user
+- Backend protected by Supabase RLS policies
+
+
+
+### **📈 Dashboard (In Progress / v0)**
+
+- Current holdings overview
+- Target vs actual allocation (ECharts planned)
+- Cash ratio indicators
+- Long-term compounding visualization
+
+
+
+## **🧱 Tech Stack**
+
+### **Frontend**
+
+- **Next.js (App Router)**
+- **TypeScript**
+- **React Server Components**
+- **shadcn/ui + Tailwind CSS**
+- ECharts (planned for visualization)
+
+
+
+### **Backend**
+
+- **Next.js API Routes (Node.js runtime)**
+
+- **Supabase PostgreSQL**
+
+- **Supabase Auth**
+
+- **Row Level Security (RLS)**
+
+  
+
+### **AI**
+
+- External LLM API (Gemini / GPT compatible)
+- Structured prompt → JSON-safe output
+- AI response persistence
+
+
+
+### **Deployment**
+
+- **Vercel**
+
+- Environment variables managed via Vercel dashboard
+
+- Supabase hosted backend
+
+  
+
+## **👤 Author**
+
+Built by **David Hou**
+
+Full-stack developer focused on **Next.js, Supabase, and AI-powered applications**.
