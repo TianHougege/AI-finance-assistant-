@@ -11,6 +11,7 @@ A live demo of this project is available here:
 🌐 https://ai-finance-assistant-two.vercel.app
 
 To make evaluation easier, you may use the following demo account:
+
 Email: kuangqi0317@outlook.com
 Password: aa12345678
 
