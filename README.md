@@ -13,6 +13,7 @@ A live demo of this project is available here:
 To make evaluation easier, you may use the following demo account:
 Email: kuangqi0317@outlook.com
 Password: aa12345678
+
 This account is for demo purposes only and contains non-sensitive sample data.
 All user data in this application is protected by Supabase Auth + Row Level Security (RLS).
 
