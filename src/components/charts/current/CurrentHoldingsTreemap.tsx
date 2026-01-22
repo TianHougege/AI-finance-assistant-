@@ -75,8 +75,22 @@ export default function CurrentHoldingsTreemap({
     () => ({
       tooltip: {
         formatter: (info: any) => {
-          const name = info?.name ?? '';
+          // In some edge cases (e.g., during auth hydration), ECharts may dispatch events
+          // while the series data is being replaced. Guard against missing params.
+          if (!info) return '';
+
+          // Prefer `info.data` for treemap nodes (leaf vs group). Group nodes can have `children`.
+          const node = info?.data;
+          if (!node) return '';
+
+          const name = String(info?.name ?? '');
           const value = info?.value;
+
+          // If this is a group node (category), keep tooltip minimal to avoid internal param issues.
+          if (node?.children) {
+            return `<b>${name}</b>`;
+          }
+
           // Show category path if available
           const path = (info?.treePathInfo ?? [])
             .map((p: any) => p?.name)
@@ -127,6 +141,15 @@ export default function CurrentHoldingsTreemap({
     [data]
   );
 
+  const chartKey = React.useMemo(() => {
+    // Force remount when treemap data changes to avoid stale event dispatchers
+    // referencing old data during rapid auth/data hydration.
+    const signature = data
+      .map((g: any) => `${g.name}:${(g.children ?? []).length}`)
+      .join('|');
+    return `${data.length}-${holdings?.length ?? 0}-${signature}`;
+  }, [data, holdings]);
+
   // Empty state
   if (!data.length) {
     return (
@@ -142,6 +165,7 @@ export default function CurrentHoldingsTreemap({
   return (
     <div style={{ height }}>
       <ReactECharts
+        key={chartKey}
         option={option}
         style={{ height: '100%', width: '100%' }}
         notMerge
