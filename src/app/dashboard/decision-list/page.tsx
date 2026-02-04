@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import DecisionDialog from './decisionDialog';
 
 type DecisionItem = {
-  id: string;
+  id: number;
   createdAt: string;
   plannedTime: string;
   actionType: 'buy' | 'sell' | 'trim' | 'add' | 'dca' | 'resist';
@@ -31,7 +31,7 @@ type DecisionItem = {
 
 function mapRowToDecisionItem(row: any): DecisionItem {
   return {
-    id: String(row.id),
+    id: row.id,
     createdAt: row.created_at,
     plannedTime: row.planned_time,
     actionType: row.action_type,
@@ -46,6 +46,9 @@ const initialDecisions: DecisionItem[] = [];
 export default function DecisionListSection() {
   const [items, setItems] = useState<DecisionItem[]>(initialDecisions);
   const [open, setOpen] = useState(false);
+
+  // lightweight toast (no extra libs)
+  const [toastMsg, setToastMsg] = useState<string>('');
 
   useEffect(() => {
     async function loadDecisions() {
@@ -89,8 +92,49 @@ export default function DecisionListSection() {
     setItems((prev) => [...prev, created]);
   };
 
+  const handleDelete = async (item: DecisionItem) => {
+    try {
+      const res = await fetch('/api/decisions', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: item.id }),
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        console.error(
+          'delete actions failed:',
+          res.status,
+          res.statusText,
+          text
+        );
+        return;
+      }
+
+      // Update UI immediately after server confirms deletion
+      setItems((prev) => prev.filter((x) => x.id !== item.id));
+
+      // Show a small success toast (bottom-right)
+      setToastMsg('Deleted successfully');
+      if ((globalThis as any).__decisionToastTimerRef) {
+        clearTimeout((globalThis as any).__decisionToastTimerRef);
+      }
+      (globalThis as any).__decisionToastTimerRef = setTimeout(() => {
+        setToastMsg('');
+      }, 1800);
+    } catch (err) {
+      console.error('Failed to delete actions', err);
+    }
+  };
+
   return (
     <section className="space-y-4">
+      {toastMsg ? (
+        <div className="fixed bottom-4 right-4 z-50">
+          <div className="rounded-md border border-white/10 bg-zinc-900 px-3 py-2 text-xs text-white shadow-md">
+            {toastMsg}
+          </div>
+        </div>
+      ) : null}
       <Card>
         <CardHeader>
           <CardTitle className="text-sm">Decision list</CardTitle>
@@ -114,17 +158,16 @@ export default function DecisionListSection() {
                 <TableHead className="w-[120px] text-xs">Time</TableHead>
                 <TableHead className="w-[100px] text-xs">Action</TableHead>
                 <TableHead className="w-[100px] text-xs">Object type</TableHead>
-                <TableHead className="text-xs">Object name</TableHead>
-                <TableHead className="w-20 text-xs text-right">
-                  Amount
-                </TableHead>
+                <TableHead className="w-[100px] text-xs">Object name</TableHead>
+                <TableHead className="w-20 text-xs">Amount</TableHead>
+                <TableHead className="w-[90px] text-xs">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={7}
                     className="py-6 text-center text-xs text-muted-foreground"
                   >
                     No decisions yet. Click “New decision” to add one.
@@ -138,7 +181,10 @@ export default function DecisionListSection() {
                     <TableCell>{item.actionType}</TableCell>
                     <TableCell>{item.objectType}</TableCell>
                     <TableCell>{item.objectName}</TableCell>
-                    <TableCell className="text-right">{item.amount}</TableCell>
+                    <TableCell>{item.amount}</TableCell>
+                    <TableCell>
+                      <Button onClick={() => handleDelete(item)}>Delete</Button>
+                    </TableCell>
                   </TableRow>
                 ))
               )}

@@ -4,7 +4,9 @@ import * as React from 'react';
 import dynamic from 'next/dynamic';
 
 // Avoid SSR issues
-const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
+const ReactECharts: any = dynamic(() => import('echarts-for-react'), {
+  ssr: false,
+});
 
 export type HoldingRowForTreemap = {
   name: string | null;
@@ -71,6 +73,35 @@ export default function CurrentHoldingsTreemap({
     [holdings]
   );
 
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+  const chartRef = React.useRef<any>(null);
+
+  // Resize when height/data changes (wait 2 frames so DOM height is applied)
+  React.useEffect(() => {
+    const inst = chartRef.current?.getEchartsInstance?.();
+    if (!inst) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => inst.resize());
+    });
+  }, [data.length, height]);
+
+  // Also observe container size changes (more reliable than window resize)
+  React.useEffect(() => {
+    const el = containerRef.current;
+    const inst = chartRef.current?.getEchartsInstance?.();
+    if (!el || !inst || typeof ResizeObserver === 'undefined') return;
+
+    const ro = new ResizeObserver(() => {
+      try {
+        inst.resize();
+      } catch {}
+    });
+
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const option = React.useMemo(
     () => ({
       tooltip: {
@@ -104,6 +135,10 @@ export default function CurrentHoldingsTreemap({
       series: [
         {
           type: 'treemap',
+          bottom: 30,
+          top: 0,
+          left: 0,
+          right: 0,
           data,
           roam: false,
           nodeClick: false,
@@ -115,7 +150,7 @@ export default function CurrentHoldingsTreemap({
           },
           upperLabel: {
             show: true,
-            height: 20,
+            height: 14,
           },
           itemStyle: {
             borderColor: 'rgba(255,255,255,0.18)',
@@ -154,8 +189,10 @@ export default function CurrentHoldingsTreemap({
   if (!data.length) {
     return (
       <div
+        ref={containerRef}
+        data-treemap-wrapper
         className="h-full w-full rounded-md border border-dashed flex items-center justify-center text-sm text-muted-foreground"
-        style={{ height }}
+        style={{ height: `${height}px` }}
       >
         暂无持仓数据
       </div>
@@ -163,13 +200,19 @@ export default function CurrentHoldingsTreemap({
   }
 
   return (
-    <div style={{ height }}>
+    <div
+      ref={containerRef}
+      data-treemap-wrapper
+      style={{ height: `${height}px` }}
+    >
       <ReactECharts
-        key={chartKey}
+        ref={chartRef}
+        key={`${chartKey}-${height}`}
         option={option}
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: `${height}px`, width: '100%' }}
         notMerge
         lazyUpdate
+        autoResize
       />
     </div>
   );

@@ -71,3 +71,26 @@ export async function GET() {
   }
   return new Response(JSON.stringify(data), { status: 200 });
 }
+
+export async function DELETE(req: Request) {
+  const { id } = await req.json();
+  const ctx = await userData();
+  if (ctx === null)
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+    });
+  const { supabase, user } = ctx;
+  const { data, error } = await supabase
+    .from('decisions')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('id', id)
+    .select();
+  if (error) {
+    console.error('Supabase delete error:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+    });
+  }
+  return new Response(JSON.stringify(data), { status: 200 });
+}

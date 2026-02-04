@@ -4,6 +4,7 @@
 
 It helps individual investors define their investment framework, record decisions, and receive AI-assisted feedback — focusing on **long-term thinking rather than short-term trading**.
 
+<<<<<<< HEAD
 🔗 Live Demo
 
 A live demo of this project is available here:
@@ -20,6 +21,8 @@ All user data in this application is protected by Supabase Auth + Row Level Secu
 
 
 
+=======
+>>>>>>> e4b8c1a (update landing page become more bueaty)
 This project is designed as a **portfolio-grade full-stack application**, demonstrating authentication, data isolation, API design, and AI integration.
 
 ## **🚀 Local Development**
@@ -28,8 +31,6 @@ This project is designed as a **portfolio-grade full-stack application**, demons
 npm install
 npm run dev
 ```
-
-
 
 ## **✨ Core Features**
 
@@ -43,13 +44,9 @@ npm run dev
 
 - Row Level Security (RLS) for user data isolation
 
-  
-
 ### **📊 Investment Framework**
 
 - Define personal investment principles:
-
-  
 
   - Target return
   - Risk limits
@@ -60,8 +57,6 @@ npm run dev
 
 - Each user owns their **private investment data**
 
-  
-
 ### **🧠 AI-Assisted Analysis**
 
 - User investment plans are sent to an AI model
@@ -71,15 +66,11 @@ npm run dev
   - Behavioral warnings
 - AI feedback is persisted and reloaded across sessions
 
-
-
 ### **📝 Decision Log**
 
 - Record investment decisions with context
 - Decisions are automatically linked to the authenticated user
 - Backend protected by Supabase RLS policies
-
-
 
 ### **📈 Dashboard (In Progress / v0)**
 
@@ -87,8 +78,6 @@ npm run dev
 - Target vs actual allocation (ECharts planned)
 - Cash ratio indicators
 - Long-term compounding visualization
-
-
 
 ## **🧱 Tech Stack**
 
@@ -100,8 +89,6 @@ npm run dev
 - **shadcn/ui + Tailwind CSS**
 - ECharts (planned for visualization)
 
-
-
 ### **Backend**
 
 - **Next.js API Routes (Node.js runtime)**
@@ -112,15 +99,11 @@ npm run dev
 
 - **Row Level Security (RLS)**
 
-  
-
 ### **AI**
 
 - External LLM API (Gemini / GPT compatible)
 - Structured prompt → JSON-safe output
 - AI response persistence
-
-
 
 ### **Deployment**
 
@@ -129,8 +112,6 @@ npm run dev
 - Environment variables managed via Vercel dashboard
 
 - Supabase hosted backend
-
-  
 
 ## **👤 Author**
 

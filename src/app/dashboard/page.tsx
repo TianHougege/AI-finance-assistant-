@@ -155,15 +155,15 @@ export default function DashboardPage() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-5xl px-4 pb-4 pt-2">
+    <section className="mx-auto w-full max-w-6xl px-4 pb-4 pt-2">
       {/* Dashboard grid */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-20">
         {/* Left column (13/20) */}
         <div className="min-w-0 flex flex-col gap-3 lg:col-span-13">
           {/* Current Holdings */}
           <Card className="h-[360px] overflow-hidden flex flex-col">
-            <CardHeader>
-              <div className="flex items-start justify-between gap-4">
+            <CardHeader className="pb-2">
+              <div className="flex items-start justify-between gap-2">
                 <div>
                   <CardTitle>现有持仓</CardTitle>
                   <CardDescription>
@@ -180,23 +180,23 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="pt-1 pb-3 flex-1">
+            <CardContent className="pt-0 pb-3 flex-1">
               {/* IMPORTANT: ECharts needs a non-zero height. Control it here. */}
               <div className="min-w-0 flex-1 rounded-md -mt-2">
-                <CurrentHoldingsTreemap holdings={holdingRows} height={240} />
+                <CurrentHoldingsTreemap holdings={holdingRows} height={278} />
               </div>
             </CardContent>
           </Card>
 
           {/* Target Holdings */}
           <Card className="h-[360px] overflow-hidden flex flex-col">
-            <CardHeader>
+            <CardHeader className="pb-2">
               <CardTitle>目标持仓</CardTitle>
               <CardDescription>展示长期目标资产配置</CardDescription>
             </CardHeader>
-            <CardContent className="flex-1">
+            <CardContent className="pt-0 flex-1">
               {/* IMPORTANT: ECharts needs a non-zero height. Control it here. */}
-              <div className="min-w-0 h-[240px] rounded-md">
+              <div className="min-w-0 h-60 rounded-md">
                 <TargetHoldingsStackBar target={targetAllocations} />
               </div>
             </CardContent>
@@ -207,7 +207,7 @@ export default function DashboardPage() {
         <div className="min-w-0 flex flex-col gap-3 lg:col-span-7">
           {/* Cash Flow */}
           <Card className="h-[360px] overflow-hidden flex flex-col">
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-1">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <CardTitle>现金流情况</CardTitle>
@@ -242,7 +242,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="flex-1">
               {/* IMPORTANT: ECharts needs a non-zero height. Control it here. */}
-              <div className="min-w-0 h-[240px] rounded-md">
+              <div className="min-w-0 h-60 rounded-md">
                 <ValueTrendLine
                   principal={10000}
                   annualRate={0.07}

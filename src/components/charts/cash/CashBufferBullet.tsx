@@ -192,7 +192,6 @@ export function CashFlowGauge({
       </div>
 
       <div className="mt-2 text-xs opacity-80">{level.hint}</div>
-      <div className="mt-1 text-xs opacity-60">（v0 暂不做币种换算）</div>
     </div>
   );
 }

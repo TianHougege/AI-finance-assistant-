@@ -14,13 +14,12 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabaseBrowser';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function AuthPage() {
-  const [inEmail, setInEmail] = useState('');
-  const [inPassword, setInPassword] = useState('');
+  const [inEmail, setInEmail] = useState('kuangqi0317@outlook.com');
+  const [inPassword, setInPassword] = useState('aa12345678');
   const [upEmail, setUpEmail] = useState('');
   const [upPassword, setUpPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,16 +40,16 @@ export default function AuthPage() {
       console.log('TRIM:', JSON.stringify(upEmail.trim()));
       if (!resUp.ok) {
         const payload = await resUp.json().catch(() => null);
-        throw new Error(payload?.message ?? '注册失败');
+        throw new Error(payload?.message ?? 'Sign up failed');
       }
-      toast.success('注册成功！');
+      toast.success('Account created successfully!');
       setUpPassword('');
       setUpEmail('');
     } catch (error: unknown) {
       setAuthError(
         error instanceof Error ? error.message : 'An error occurred'
       );
-      toast.error('注册失败');
+      toast.error('Sign up failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -68,9 +67,9 @@ export default function AuthPage() {
       });
       if (!res.ok) {
         const payload = await res.json().catch(() => null);
-        throw new Error(payload?.message ?? '登录失败');
+        throw new Error(payload?.message ?? 'Sign in failed');
       }
-      toast.success('登录成功！');
+      toast.success('Signed in successfully!');
       //route.push add when finished route function
       router.push('/dashboard');
       router.refresh();
@@ -79,7 +78,7 @@ export default function AuthPage() {
       setAuthError(
         error instanceof Error ? error.message : 'An error occurred'
       );
-      toast.error('登录失败');
+      toast.error('Sign in failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -106,9 +105,11 @@ export default function AuthPage() {
             <CardHeader className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <CardTitle className="text-xl">SideKick 投资助手</CardTitle>
+                  <CardTitle className="text-xl">
+                    SideKick Investment Assistant
+                  </CardTitle>
                   <CardDescription className="text-sm">
-                    安全访问你的投资框架与投资驾驶舱。
+                    Secure access to your investment framework and dashboard.
                   </CardDescription>
                 </div>
               </div>
@@ -117,20 +118,20 @@ export default function AuthPage() {
             <CardContent className="pt-2">
               <Tabs defaultValue="sign-in" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="sign-in">登录</TabsTrigger>
-                  <TabsTrigger value="sign-up">注册</TabsTrigger>
+                  <TabsTrigger value="sign-in">Sign in</TabsTrigger>
+                  <TabsTrigger value="sign-up">Sign up</TabsTrigger>
                 </TabsList>
 
                 {/* Sign in */}
                 <TabsContent value="sign-in" className="mt-4 space-y-4">
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signin-email">邮箱</Label>
+                      <Label htmlFor="signin-email">Email</Label>
                       <Input
                         id="signin-email"
                         type="email"
                         inputMode="email"
-                        placeholder="请输入邮箱"
+                        placeholder="Enter your email"
                         autoComplete="email"
                         value={inEmail}
                         onChange={(e) => setInEmail(e.target.value)}
@@ -139,19 +140,19 @@ export default function AuthPage() {
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="signin-password">密码</Label>
+                        <Label htmlFor="signin-password">Password</Label>
                         <button
                           type="button"
                           className="text-xs text-muted-foreground hover:text-foreground"
-                          aria-label="忘记密码"
+                          aria-label="Forgot password"
                         >
-                          忘记了？
+                          Forgot?
                         </button>
                       </div>
                       <Input
                         id="signin-password"
                         type="password"
-                        placeholder="请输入密码"
+                        placeholder="Enter your password"
                         autoComplete="current-password"
                         value={inPassword}
                         onChange={(e) => setInPassword(e.target.value)}
@@ -164,13 +165,13 @@ export default function AuthPage() {
                       onClick={handleSignIn}
                       disabled={isSubmitting}
                     >
-                      登录
+                      Sign in
                     </Button>
 
                     <div className="relative">
                       <Separator />
                       <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-3 text-xs text-muted-foreground">
-                        或
+                        OR
                       </span>
                     </div>
 
@@ -179,7 +180,7 @@ export default function AuthPage() {
                       type="button"
                       variant="secondary"
                     >
-                      使用 Google 继续
+                      Continue with Google
                     </Button>
                   </div>
                 </TabsContent>
@@ -189,30 +190,30 @@ export default function AuthPage() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="signup-first">名</Label>
+                        <Label htmlFor="signup-first">First name</Label>
                         <Input
                           id="signup-first"
-                          placeholder="名"
+                          placeholder="First name"
                           autoComplete="given-name"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="signup-last">姓</Label>
+                        <Label htmlFor="signup-last">Last name</Label>
                         <Input
                           id="signup-last"
-                          placeholder="姓"
+                          placeholder="Last name"
                           autoComplete="family-name"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email">邮箱</Label>
+                      <Label htmlFor="signup-email">Email</Label>
                       <Input
                         id="signup-email"
                         type="email"
                         inputMode="email"
-                        placeholder="请输入邮箱"
+                        placeholder="Enter your email"
                         autoComplete="email"
                         value={upEmail}
                         onChange={(e) => setUpEmail(e.target.value)}
@@ -220,17 +221,18 @@ export default function AuthPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password">密码</Label>
+                      <Label htmlFor="signup-password">Password</Label>
                       <Input
                         id="signup-password"
                         type="password"
-                        placeholder="设置密码（建议强密码）"
+                        placeholder="Create a password (strong recommended)"
                         autoComplete="new-password"
                         value={upPassword}
                         onChange={(e) => setUpPassword(e.target.value)}
                       />
                       <p className="text-xs text-muted-foreground">
-                        至少 8 位，建议混合字母与数字。
+                        At least 8 characters. Mix letters and numbers for best
+                        security.
                       </p>
                     </div>
 
@@ -240,11 +242,12 @@ export default function AuthPage() {
                       onClick={handleSignUp}
                       disabled={isSubmitting}
                     >
-                      创建账号
+                      Create account
                     </Button>
 
                     <p className="text-center text-xs text-muted-foreground">
-                      创建账号即表示你同意《服务条款》和《隐私政策》。
+                      By creating an account, you agree to the Terms of Service
+                      and Privacy Policy.
                     </p>
                   </div>
                 </TabsContent>
