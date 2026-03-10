@@ -14,7 +14,6 @@ export default async function Layout({
   const supabase = await createClient();
   const {
     data: { user },
-    error,
   } = await supabase.auth.getUser();
 
   if (!user) {
@@ -36,7 +35,7 @@ export default async function Layout({
           </div>
 
           <div className="ml-auto flex items-center gap-2">
-            <UserMenu />
+            <UserMenu email={user?.email} />
           </div>
         </header>
 

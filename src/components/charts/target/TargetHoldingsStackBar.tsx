@@ -37,19 +37,58 @@ const DEFAULT_TARGET: TargetAllocation[] = [
   { category: 'Gold', weight: 10 },
 ];
 
-// 10-color palette for up to ~10 segments; will cycle if more.
-const PALETTE = [
-  '#5470C6',
-  '#91CC75',
-  '#FAC858',
-  '#EE6666',
-  '#73C0DE',
-  '#3BA272',
-  '#FC8452',
-  '#9A60B4',
-  '#EA7CCC',
-  '#2F4554',
+// Mirrors the treemap's KNOWN_COLORS: [vibrant, dark]
+type ColorPair = [string, string];
+
+const KNOWN_COLORS: Record<string, ColorPair> = {
+  etf: ['#818cf8', '#3730a3'],
+  stock: ['#60a5fa', '#1e40af'],
+  bond: ['#38bdf8', '#075985'],
+  treasury: ['#34d399', '#065f46'],
+  gold: ['#fbbf24', '#92400e'],
+  crypto: ['#c084fc', '#6b21a8'],
+  cash: ['#2dd4bf', '#134e4a'],
+  deposit: ['#67e8f9', '#164e63'],
+  other: ['#94a3b8', '#334155'],
+};
+
+const AUTO_PALETTE: ColorPair[] = [
+  ['#f472b6', '#9d174d'],
+  ['#fb923c', '#9a3412'],
+  ['#a3e635', '#3f6212'],
+  ['#4ade80', '#166534'],
+  ['#e879f9', '#86198f'],
+  ['#f87171', '#991b1b'],
+  ['#facc15', '#854d0e'],
+  ['#22d3ee', '#155e75'],
 ];
+
+function hashCategory(str: string): number {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i);
+  return Math.abs(h);
+}
+
+function getColors(category: string): ColorPair {
+  const key = category.toLowerCase();
+  return (
+    KNOWN_COLORS[key] ?? AUTO_PALETTE[hashCategory(key) % AUTO_PALETTE.length]
+  );
+}
+
+function makeGradient(c0: string, c1: string) {
+  return {
+    type: 'linear' as const,
+    x: 0,
+    y: 0,
+    x2: 1,
+    y2: 0,
+    colorStops: [
+      { offset: 0, color: c0 },
+      { offset: 1, color: c1 },
+    ],
+  };
+}
 
 function normalize(target: TargetAllocation[]) {
   // Accept either 0~1 or 0~100; normalize to 0~100 for the bar.
@@ -104,10 +143,11 @@ export default function TargetHoldingsStackBar({
         axisTick: { show: false },
         axisLine: { show: false },
         axisLabel: {
-          // Leave room for longer Chinese names
           overflow: 'truncate',
           width: 72,
-          margin: 2,
+          margin: 8,
+          color: '#94a3b8',
+          fontSize: 12,
         },
       },
       xAxis: {
@@ -119,10 +159,12 @@ export default function TargetHoldingsStackBar({
         axisLine: { show: false },
         splitLine: {
           show: true,
-          lineStyle: { type: 'dashed', opacity: 0.35 },
+          lineStyle: { color: '#1e293b', type: 'dashed' },
         },
         axisLabel: {
           show: true,
+          color: '#64748b',
+          fontSize: 11,
           formatter: '{value}%',
         },
       },
@@ -142,15 +184,23 @@ export default function TargetHoldingsStackBar({
         {
           name: 'Target',
           type: 'bar',
-          barWidth: 18,
+          barWidth: 16,
+          showBackground: true,
+          backgroundStyle: {
+            color: 'rgba(255,255,255,0.05)',
+            borderRadius: [0, 6, 6, 0],
+          },
           data: values,
           itemStyle: {
+            borderRadius: [0, 6, 6, 0],
             color: (params: any) => {
               const idx = Number(params?.dataIndex ?? 0);
-              return PALETTE[idx % PALETTE.length];
+              const cat = ordered[idx]?.category ?? '';
+              const [c0, c1] = getColors(cat);
+              return makeGradient(c0, c1);
             },
           },
-          label: { show: true, position: 'right', formatter: '{c}%' },
+          label: { show: false },
           emphasis: { focus: 'series' },
         },
       ],

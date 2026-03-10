@@ -3,99 +3,44 @@
 import * as React from 'react';
 import dynamic from 'next/dynamic';
 
-// Client-only to avoid SSR issues
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
-export type CashSafetyLevel = {
-  key: 'excellent' | 'good' | 'caution' | 'danger' | 'critical';
-  label: string;
-  hint: string;
-  color: string;
-};
-
 export type CashFlowGaugeProps = {
-  /** Cash amount (no FX conversion in v0). */
   cashValue?: number;
-  /** Current holdings total value (no FX conversion in v0). */
   holdingsValue?: number;
-  /** Optional height for the chart container. */
   height?: number;
-  /** Optional title shown above the gauge (UI-only). */
-  title?: string;
 };
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function formatPct01(v01: number) {
-  return `${Math.round(v01 * 100)}%`;
-}
-
-function getCashLevel(pct01: number): CashSafetyLevel {
-  // Thresholds requested: 80%, 50%, 30%, 10%
-  if (pct01 >= 0.8) {
-    return {
-      key: 'excellent',
-      label: '很安全',
-      hint: '现金缓冲充足，可从容应对波动/机会。',
-      color: '#389e0d',
-    };
-  }
-  if (pct01 >= 0.5) {
-    return {
-      key: 'good',
-      label: '安全',
-      hint: '现金缓冲较稳，注意别让持仓过快膨胀。',
-      color: '#52c41a',
-    };
-  }
-  if (pct01 >= 0.3) {
-    return {
-      key: 'caution',
-      label: '偏紧',
-      hint: '现金缓冲开始变薄，谨慎加仓，优先补现金。',
-      color: '#faad14',
-    };
-  }
-  if (pct01 >= 0.1) {
-    return {
-      key: 'danger',
-      label: '危险',
-      hint: '现金缓冲很薄，建议暂停加仓/先恢复现金比例。',
-      color: '#ff4d4f',
-    };
-  }
-  return {
-    key: 'critical',
-    label: '极危险',
-    hint: '几乎没有现金缓冲，任何波动都可能被迫行动。',
-    color: '#a8071a',
-  };
-}
-
-/**
- * Cash flow safety gauge (static framework).
- * Ratio = cash / (cash + holdings). No FX conversion in v0.
- */
 export function CashFlowGauge({
   cashValue = 5000,
   holdingsValue = 10000,
-  height = 220,
+  height = 195,
 }: CashFlowGaugeProps) {
   const total = Math.max(0, cashValue) + Math.max(0, holdingsValue);
   const pct01 = total > 0 ? clamp(Math.max(0, cashValue) / total, 0, 1) : 0;
-  const level = getCashLevel(pct01);
 
   const option = React.useMemo(() => {
-    // Colored arcs by threshold (0..1)
+    // Tailwind 600-level: visible & rich, matching treemap hue family
     const axisSegments: [number, string][] = [
-      [0.1, '#a8071a'],
-      [0.3, '#ff4d4f'],
-      [0.5, '#faad14'],
-      [0.8, '#52c41a'],
-      [1, '#389e0d'],
+      [0.1, '#e11d48'],  // rose-600
+      [0.3, '#dc2626'],  // red-600
+      [0.5, '#d97706'],  // amber-600
+      [0.8, '#16a34a'],  // green-600
+      [1,   '#0d9488'],  // teal-600
     ];
+
+    const sharedGaugeProps = {
+      center: ['50%', '62%'] as [string, string],
+      radius: '88%',
+      startAngle: 210,
+      endAngle: -30,
+      min: 0,
+      max: 100,
+    };
 
     return {
       animation: true,
@@ -103,98 +48,121 @@ export function CashFlowGauge({
       animationEasing: 'cubicOut',
 
       series: [
+        // ── Layer 1: dim background track ──────────────────────────
         {
           type: 'gauge',
-          startAngle: 210,
-          endAngle: -30,
-          min: 0,
-          max: 100,
+          ...sharedGaugeProps,
+          splitNumber: 0,
+          axisLine: {
+            lineStyle: {
+              width: 16,
+              color: [[1, 'rgba(255,255,255,0.06)']],
+            },
+          },
+          axisTick: { show: false },
+          splitLine: { show: false },
+          axisLabel: { show: false },
+          pointer: { show: false },
+          title: { show: false },
+          detail: { show: false },
+          data: [{ value: 0 }],
+        },
+
+        // ── Layer 2: main colored gauge ─────────────────────────────
+        {
+          type: 'gauge',
+          ...sharedGaugeProps,
           splitNumber: 5,
 
           axisLine: {
             lineStyle: {
-              width: 14,
+              width: 12,
+              shadowBlur: 8,
+              shadowColor: 'rgba(0,0,0,0.5)',
               color: axisSegments.map(([p, c]) => [p, c]),
             },
           },
 
           pointer: {
-            length: '58%',
-            width: 6,
-            itemStyle: { color: level.color },
+            length: '60%',
+            width: 4,
+            itemStyle: {
+              color: 'auto',
+              shadowBlur: 14,
+              shadowColor: 'rgba(255,255,255,0.35)',
+            },
           },
 
           axisTick: {
             show: true,
-            distance: -14,
-            length: 6,
-            lineStyle: { opacity: 0.25 },
+            distance: -12,
+            length: 4,
+            lineStyle: { color: 'rgba(255,255,255,0.18)', width: 1 },
           },
           splitLine: {
             show: true,
-            distance: -14,
-            length: 12,
-            lineStyle: { opacity: 0.25 },
+            distance: -12,
+            length: 9,
+            lineStyle: { color: 'rgba(255,255,255,0.22)', width: 1.5 },
           },
           axisLabel: {
             show: true,
             distance: 18,
+            color: '#64748b',
+            fontSize: 10,
             formatter: (v: number) => `${v}%`,
           },
 
           title: {
-            show: false,
+            show: true,
+            offsetCenter: [0, '58%'],
+            fontSize: 11,
+            color: '#64748b',
+            fontWeight: 400,
           },
           detail: {
             valueAnimation: true,
             formatter: (v: number) => `${Math.round(v)}%`,
-            offsetCenter: [0, '10%'],
-            fontSize: 26,
+            offsetCenter: [0, '12%'],
+            fontSize: 28,
             fontWeight: 700,
+            color: '#e2e8f0',
+            shadowBlur: 6,
+            shadowColor: 'rgba(255,255,255,0.15)',
           },
 
-          data: [
-            {
-              value: Math.round(pct01 * 100),
-              name: level.label,
-            },
-          ],
+          data: [{ value: Math.round(pct01 * 100), name: 'Safety Margin' }],
         },
-      ],
 
-      // Extra annotation under gauge
-      graphic: [
+        // ── Layer 3: center hub dot ─────────────────────────────────
         {
-          type: 'text',
-          left: 'center',
-          top: '82%',
-          style: {
-            text: `现金: ${cashValue}  |  持仓: ${holdingsValue}  |  占比: ${formatPct01(
-              pct01
-            )}`,
-            fontSize: 12,
-            opacity: 0.7,
-          },
+          type: 'gauge',
+          ...sharedGaugeProps,
+          splitNumber: 0,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { show: false },
+          axisLabel: { show: false },
+          pointer: { show: false },
+          title: { show: false },
+          detail: { show: false },
+          data: [{ value: 0 }],
+          // hub rendered via markPoint workaround — skip; the pointer base handles it
         },
       ],
     };
-  }, [cashValue, holdingsValue, pct01, level.color, level.label]);
+  }, [pct01]);
 
   return (
-    <div className="w-full">
-      <div className="rounded-md" style={{ height }}>
-        <ReactECharts
-          option={option}
-          style={{ height: '100%', width: '100%' }}
-          notMerge={true}
-          lazyUpdate={true}
-        />
-      </div>
-
-      <div className="mt-2 text-xs opacity-80">{level.hint}</div>
+    <div className="w-full" style={{ height }}>
+      <ReactECharts
+        option={option}
+        style={{ height: '100%', width: '100%' }}
+        notMerge={true}
+        lazyUpdate={true}
+      />
     </div>
   );
 }
 
-// Keep a default export for convenience in imports.
 export default CashFlowGauge;

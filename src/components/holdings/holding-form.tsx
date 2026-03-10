@@ -11,11 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Align with Supabase tables:
 // public.holding: name/category/market/currency (text), value (numeric, nullable)
-// public.portfolio: cash_value (numeric, nullable), cash_currency (captured as text code in the form; map to numeric later if needed)
+// public.portfolio: cash_value (numeric, nullable), cash_currency (text code)
 export type HoldingDraft = {
   name: string;
   category: string;
@@ -24,15 +24,18 @@ export type HoldingDraft = {
   value: number | null;
 };
 
+export type HoldingSnapshot = {
+  portfolio: {
+    cash_value: number | null;
+    cash_currency: string | null;
+  };
+  holdings: HoldingDraft[];
+};
+
 type Props = {
+  initialData?: HoldingSnapshot;
   onCancel?: () => void;
-  onSave?: (payload: {
-    portfolio: {
-      cash_value: number | null;
-      cash_currency: string | null;
-    };
-    holdings: HoldingDraft[];
-  }) => void;
+  onSave?: (payload: HoldingSnapshot) => void;
   saving?: boolean;
 };
 
@@ -72,10 +75,23 @@ const EMPTY_ROW: HoldingDraft = {
   value: null,
 };
 
-export function HoldingForm({ onCancel, onSave, saving }: Props) {
-  const [rows, setRows] = useState<HoldingDraft[]>([{ ...EMPTY_ROW }]);
-  const [cashCurrency, setCashCurrency] = useState<string | null>(null);
-  const [cashValue, setCashValue] = useState<number | null>(null);
+export function HoldingForm({ initialData, onCancel, onSave, saving }: Props) {
+  const [rows, setRows] = useState<HoldingDraft[]>(
+    initialData?.holdings?.length ? initialData.holdings : [{ ...EMPTY_ROW }]
+  );
+  const [cashCurrency, setCashCurrency] = useState<string | null>(
+    initialData?.portfolio?.cash_currency ?? null
+  );
+  const [cashValue, setCashValue] = useState<number | null>(
+    initialData?.portfolio?.cash_value ?? null
+  );
+
+  // Reset form state whenever initialData changes (e.g. drawer re-opens with saved data)
+  useEffect(() => {
+    setRows(initialData?.holdings?.length ? initialData.holdings : [{ ...EMPTY_ROW }]);
+    setCashCurrency(initialData?.portfolio?.cash_currency ?? null);
+    setCashValue(initialData?.portfolio?.cash_value ?? null);
+  }, [initialData]);
 
   function updateRow(idx: number, patch: Partial<HoldingDraft>) {
     setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
@@ -104,15 +120,15 @@ export function HoldingForm({ onCancel, onSave, saving }: Props) {
       {/* Cash block */}
       <div className="rounded-lg border bg-background p-4">
         <div className="mb-3">
-          <div className="text-sm font-semibold">现金（单独填写）</div>
+          <div className="text-sm font-semibold">Cash (separate entry)</div>
           <div className="text-xs text-muted-foreground">
-            现金是安全垫：这里先独立出来，后续也可改成 holdings 的一行。
+            Cash is your safety buffer — tracked separately from other holdings.
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
-            <Label htmlFor="cashCurrency">现金币种</Label>
+            <Label htmlFor="cashCurrency">Currency</Label>
             <Select
               value={cashCurrency || undefined}
               onValueChange={(v) => setCashCurrency(v)}
@@ -131,10 +147,10 @@ export function HoldingForm({ onCancel, onSave, saving }: Props) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cashValue">现金金额</Label>
+            <Label htmlFor="cashValue">Amount</Label>
             <Input
               id="cashValue"
-              placeholder="例如：5000"
+              placeholder="e.g. 5000"
               inputMode="decimal"
               value={cashValue ?? ''}
               onChange={(e) => {
@@ -152,9 +168,9 @@ export function HoldingForm({ onCancel, onSave, saving }: Props) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm font-semibold">持仓条目</div>
+            <div className="text-sm font-semibold">Holdings</div>
             <div className="text-xs text-muted-foreground">
-              普通表单：一行一行填。后续可替换为下拉选择与自动补全。
+              Add one row per position.
             </div>
           </div>
 
@@ -167,7 +183,7 @@ export function HoldingForm({ onCancel, onSave, saving }: Props) {
           {rows.map((row, idx) => (
             <div key={idx} className="rounded-lg border bg-background p-4">
               <div className="mb-3 flex items-center justify-between">
-                <div className="text-sm font-medium">第 {idx + 1} 条</div>
+                <div className="text-sm font-medium">Position {idx + 1}</div>
 
                 <Button
                   type="button"
@@ -175,13 +191,13 @@ export function HoldingForm({ onCancel, onSave, saving }: Props) {
                   onClick={() => removeRow(idx)}
                   disabled={rows.length === 1}
                 >
-                  删除
+                  Remove
                 </Button>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor={`name-${idx}`}>名称</Label>
+                  <Label htmlFor={`name-${idx}`}>Name</Label>
                   <Input
                     id={`name-${idx}`}
                     placeholder="VOO / AAPL / GOOG"
@@ -191,7 +207,7 @@ export function HoldingForm({ onCancel, onSave, saving }: Props) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor={`category-${idx}`}>分类</Label>
+                  <Label htmlFor={`category-${idx}`}>Category</Label>
                   <Select
                     value={row.category || undefined}
                     onValueChange={(v) => updateRow(idx, { category: v })}
@@ -210,7 +226,7 @@ export function HoldingForm({ onCancel, onSave, saving }: Props) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor={`market-${idx}`}>市场</Label>
+                  <Label htmlFor={`market-${idx}`}>Market</Label>
                   <Select
                     value={row.market || undefined}
                     onValueChange={(v) => updateRow(idx, { market: v })}
@@ -229,7 +245,7 @@ export function HoldingForm({ onCancel, onSave, saving }: Props) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor={`currency-${idx}`}>币种</Label>
+                  <Label htmlFor={`currency-${idx}`}>Currency</Label>
                   <Select
                     value={row.currency || undefined}
                     onValueChange={(v) => updateRow(idx, { currency: v })}
@@ -248,10 +264,10 @@ export function HoldingForm({ onCancel, onSave, saving }: Props) {
                 </div>
 
                 <div className="col-span-2 space-y-2">
-                  <Label htmlFor={`value-${idx}`}>市值/金额</Label>
+                  <Label htmlFor={`value-${idx}`}>Market Value</Label>
                   <Input
                     id={`value-${idx}`}
-                    placeholder="例如：12000"
+                    placeholder="e.g. 12000"
                     inputMode="decimal"
                     value={row.value ?? ''}
                     onChange={(e) => {
@@ -269,17 +285,11 @@ export function HoldingForm({ onCancel, onSave, saving }: Props) {
       {/* Actions */}
       <div className="flex items-center justify-end gap-2">
         <Button type="button" variant="ghost" onClick={onCancel}>
-          取消
+          Cancel
         </Button>
         <Button type="button" onClick={handleSave}>
-          {saving ? '保存中...' : '保存'}
+          {saving ? 'Saving...' : 'Save'}
         </Button>
-      </div>
-
-      <div className="text-xs text-muted-foreground">
-        提示：category / market / currency 现在先用本地枚举
-        Select。等你接数据库后，可以把选项从 Supabase 拉取或做映射，并为
-        cash_currency 做枚举/映射。
       </div>
     </div>
   );

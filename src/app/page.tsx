@@ -29,16 +29,13 @@ export default function Home() {
             <header className="flex items-center justify-between pt-10">
               {/* Left: logo */}
               <div className="flex items-center gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-full bg-white/10">
-                  <Image
-                    src="/logo.svg"
-                    alt="Sidekick logo"
-                    width={58}
-                    height={58}
-                    className="opacity-90"
-                    priority
-                  />
-                </div>
+                <Image
+                  src="/icon.svg"
+                  alt="Sidekick logo"
+                  width={40}
+                  height={40}
+                  priority
+                />
                 <span className="text-sm font-medium tracking-wide text-zinc-100/90">
                   sidekick
                 </span>
@@ -161,7 +158,7 @@ export default function Home() {
                     <div className="flex items-center gap-3">
                       <div className="grid h-9 w-9 place-items-center rounded-full ">
                         <Image
-                          src="/logo.svg"
+                          src="/icon.svg"
                           alt="Sidekick logo"
                           width={22}
                           height={22}
